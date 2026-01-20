@@ -1,0 +1,916 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>For You</title>
+
+  <style>
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      height: 100vh;
+      background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+      font-family: Georgia, serif;
+      color: #f1f1f1;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      overflow: hidden;
+      font-size: clamp(14px, 2.8vw, 18px);
+    }
+
+    /* 🌻 Flowers layer */
+    #flowers {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    /* Overlay */
+    .overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.75);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      cursor: pointer;
+      z-index: 10;
+      animation: fadeIn 1s ease;
+    }
+
+    .overlay h2 {
+      font-size: 2rem;
+      animation: pulse 2s infinite;
+    }
+
+    /* Main content */
+    .container {
+      max-width: min(650px, 92vw);
+      padding: clamp(20px, 5vw, 40px);
+      text-align: center;
+      opacity: 0;
+      position: relative;
+      z-index: 5;
+    }
+
+    h1 {
+      font-size: 2.6rem;
+      margin-bottom: 20px;
+    }
+
+    p {
+      font-size: 1.15rem;
+      line-height: 1.7;
+      margin: 18px 0;
+    }
+
+    .question {
+      margin-top: 40px;
+      font-size: 2.1rem;
+      font-weight: bold;
+    }
+
+    .buttons {
+      margin-top: 30px;
+    }
+
+    button {
+      margin: 12px;
+      padding: 14px 34px;
+      font-size: 1rem;
+      border: none;
+      border-radius: 30px;
+      cursor: pointer;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    button:hover {
+      transform: scale(1.08);
+      box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+    }
+
+    .yes {
+      background-color: #ff6b81;
+      color: white;
+    }
+
+    .no {
+      background-color: #57606f;
+      color: white;
+    }
+
+    #response {
+      margin-top: 35px;
+      font-size: 1.4rem;
+      animation: fadeIn 1.5s ease;
+    }
+
+    /* 🌻 Bouquet */
+    .bouquet {
+      position: absolute;
+      width: 200px;
+      height: 260px;
+      animation: bouquetSway 9s ease-in-out infinite;
+      transform-origin: bottom center;
+    }
+
+    /* 🌿 Stem */
+    .stem {
+      position: absolute;
+      width: 6px;
+      height: 150px;
+      background: linear-gradient(to bottom, #3f7a3f, #2e5f2e);
+      border-radius: 4px;
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
+    }
+
+    .leaf {
+      position: absolute;
+      width: 28px;
+      height: 16px;
+      background: #3f7a3f;
+      border-radius: 50%;
+      top: 60px;
+      left: -20px;
+      transform: rotate(-30deg);
+      opacity: 0.85;
+    }
+
+    /* 🌻 Sunflower head */
+    .sunflower {
+      position: absolute;
+      width: 120px;
+      height: 120px;
+      animation: flowerFloat 7s ease-in-out infinite;
+      transform-origin: bottom center;
+    }
+
+    .petal {
+      position: absolute;
+      width: 22px;
+      height: 60px;
+      background: linear-gradient(to top, #e0a800, #f5c542, #ffe27a);
+      border-radius: 50% 50% 40% 40%;
+      top: 5px;
+      left: 50%;
+      transform-origin: bottom center;
+      animation: petalSway 4s ease-in-out infinite;
+    }
+
+    .center {
+      position: absolute;
+      width: 46px;
+      height: 46px;
+      background: radial-gradient(circle at 30% 30%, #6b4423, #3b2412);
+      border-radius: 50%;
+      top: 37px;
+      left: 37px;
+      animation: centerPulse 5s ease-in-out infinite;
+    }
+
+    /* ✨ Baby's breath */
+    .breath {
+      position: absolute;
+      width: 6px;
+      height: 6px;
+      background: white;
+      border-radius: 50%;
+      opacity: 0.6;
+      animation: floatUp linear infinite;
+    }
+
+    /* 💗 Hearts layer */
+    #hearts {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 2; /* behind text (5), above background (1) */
+    }
+
+    .heart {
+      position: absolute;
+      width: 14px;
+      height: 14px;
+      background: rgba(255, 107, 129, 0.7);
+      transform: rotate(45deg);
+      animation: floatHeart linear infinite;
+    }
+
+    .heart::before,
+    .heart::after {
+      content: "";
+      position: absolute;
+      width: 14px;
+      height: 14px;
+      background: inherit;
+      border-radius: 50%;
+    }
+
+    .heart::before {
+      top: -7px;
+      left: 0;
+    }
+
+    .heart::after {
+      left: -7px;
+      top: 0;
+    }
+
+    #cups {
+      position: fixed;
+      top: 50%;
+      left: clamp(8vw, 15vw, 22vw);
+      transform: translateY(-50%);
+      z-index: 3; /* behind text (5), above flowers/hearts */
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 2s ease;
+    }
+    .cups-wrapper {
+    animation: cupSway 6s ease-in-out infinite;
+    }
+
+    /* 🍦 Ice creams layer (right side) */
+    #icecreams{
+      position: fixed;
+      top: 50%;
+      right: clamp(4vw, 8vw, 14vw);
+      transform: translateY(-80%);
+      z-index: 3; /* behind text (5), above flowers/hearts */
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 2s ease;
+    }
+
+    .icecream-wrapper{
+      animation: iceCreamSway 7s ease-in-out infinite;
+    }
+
+    /* Scope all ice cream art so it doesn't affect your page */
+    #icecreams .stage{
+      width: clamp(180px, 36vw, 340px);
+      height: clamp(220px, 42vh, 340px);
+      gap: clamp(12px, 3vw, 28px);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      position:relative;
+    }
+
+    /* Soft ground shadow */
+    #icecreams .stage::after{
+      content:"";
+      position:absolute;
+      bottom: 12%;
+      width: 72%;
+      height: 18%;
+      background: radial-gradient(closest-side, rgba(0,0,0,.22), rgba(0,0,0,0));
+      filter: blur(10px);
+      opacity:.55;
+      transform: translateY(10px);
+      pointer-events:none;
+    }
+
+    #icecreams .icecream{
+      width: 185px;
+      height: 340px;
+      position:relative;
+      transform-origin: 50% 78%;
+      filter: drop-shadow(0 14px 12px rgba(0,0,0,.15));
+    }
+    /* Scoop */
+    #icecreams .scoop{
+      position:absolute;
+      left:50%;
+      top: 40px;
+      width: 180px;
+      height: 160px;
+      transform: translateX(-50%);
+      border: 3px solid #4a3b2b;
+      border-radius: 60% 60% 55% 55% / 62% 62% 45% 45%;
+      background:
+        radial-gradient(80px 60px at 35% 35%, rgba(255,255,255,.85), rgba(255,255,255,0) 60%),
+        radial-gradient(120px 90px at 60% 75%, rgba(0,0,0,.08), rgba(0,0,0,0) 65%),
+        linear-gradient(145deg, #fff4c6, #ffe9a6);
+      box-shadow: inset 0 -10px 0 rgba(0,0,0,.06);
+    }
+
+    /* Little drips */
+    #icecreams .scoop::before,
+    #icecreams .scoop::after{
+      content:"";
+      position:absolute;
+      bottom:-14px;
+      width: 36px;
+      height: 46px;
+      background: linear-gradient(145deg, #fff4c6, #ffe9a6);
+      border: 3px solid #4a3b2b;
+      border-top: 0;
+      border-radius: 0 0 22px 22px;
+      box-shadow: inset 0 -8px 0 rgba(0,0,0,.05);
+    }
+    #icecreams .scoop::before{ left: 28px; transform: rotate(-6deg); }
+    #icecreams .scoop::after{ right: 34px; width: 30px; height: 40px; transform: rotate(8deg); }
+
+    /* Cone */
+    #icecreams .cone{
+      position:absolute;
+      left:50%;
+      top: 170px;
+      width: 0;
+      height: 0;
+      transform: translateX(-50%);
+      border-left: 84px solid transparent;
+      border-right: 84px solid transparent;
+      border-top: 210px solid #d89a5a;
+      filter: saturate(1.05);
+    }
+    #icecreams .cone::before{
+      content:"";
+      position:absolute;
+      left: -84px;
+      top: -210px;
+      width: 168px;
+      height: 210px;
+      clip-path: polygon(50% 100%, 0 0, 100% 0);
+      border: 3px solid #4a3b2b;
+      background:
+        linear-gradient(180deg, rgba(255,255,255,.25), rgba(255,255,255,0) 35%),
+        linear-gradient(145deg, #d89a5a, #c88445);
+      border-radius: 8px;
+      box-shadow: inset 0 -12px 0 rgba(0,0,0,.08);
+    }
+
+    /* Waffle pattern */
+    #icecreams .waffle{
+      position:absolute;
+      left:50%;
+      top: 186px;
+      width: 160px;
+      height: 180px;
+      transform: translateX(-50%);
+      clip-path: polygon(50% 100%, 0 0, 100% 0);
+      opacity:.55;
+      background:
+        repeating-linear-gradient(45deg, rgba(74,59,43,.35) 0 3px, rgba(0,0,0,0) 3px 16px),
+        repeating-linear-gradient(-45deg, rgba(74,59,43,.25) 0 3px, rgba(0,0,0,0) 3px 16px);
+      border-radius: 8px;
+      pointer-events:none;
+      filter: blur(.2px);
+    }
+
+    /* Collar under scoop */
+    #icecreams .collar{
+      position:absolute;
+      left:50%;
+      top: 156px;
+      width: 150px;
+      height: 44px;
+      transform: translateX(-50%);
+      border: 3px solid #4a3b2b;
+      border-radius: 999px;
+      background: linear-gradient(145deg, #f6d9b3, #e9bb87);
+      box-shadow: inset 0 -8px 0 rgba(0,0,0,.08);
+    }
+
+    /* Tilt them toward each other */
+    #icecreams .left  { transform: rotate(14deg); }
+    #icecreams .right { transform: rotate(-14deg); }
+
+    /* Tiny highlight lines on scoop */
+    #icecreams .highlight{
+      position:absolute;
+      left: 38px;
+      top: 72px;
+      width: 56px;
+      height: 18px;
+      border-radius: 999px;
+      background: rgba(255,255,255,.55);
+      filter: blur(.2px);
+      transform: rotate(-18deg);
+      opacity:.8;
+    }
+    #icecreams .highlight2{
+      position:absolute;
+      left: 78px;
+      top: 106px;
+      width: 34px;
+      height: 12px;
+      border-radius: 999px;
+      background: rgba(255,255,255,.38);
+      transform: rotate(-12deg);
+      opacity:.8;
+    }
+
+    #sky{ 
+        position: fixed;
+        inset: 0;
+        pointer-events: none;
+        z-index: 0; /* below flowers (1), hearts (2), cups/icecream (3), container (5) */
+        opacity: 0;
+        transition: opacity 2s ease; 
+    }
+    #sky .sky{
+        position: relative;
+        width: 100%;
+        height: 100vh; /* full page */
+        background:
+            radial-gradient(1200px 600px at 50% 30%, #0b1030 0%, #050814 40%, #02030a 100%);
+        overflow: hidden;
+    }
+
+    /* STAR FIELDS */
+        #sky .stars,
+        #sky .stars::before,
+        #sky .stars::after {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background-repeat: repeat;
+        background-size: 300px 300px;
+        animation: drift 20s linear infinite;
+        }
+
+        /* main stars */
+        #sky .stars {
+        background-image:
+            radial-gradient(circle, white 1px, transparent 2px),
+            radial-gradient(circle, #b9c3ff 1px, transparent 2px),
+            radial-gradient(circle, rgba(255,255,255,.6) .7px, transparent 2px);
+        background-position: 0 0, 80px 120px, 160px 200px;
+        }
+
+        /* depth layer */
+        #sky .stars::before {
+        background-size: 420px 420px;
+        background-image:
+            radial-gradient(circle, rgba(255,255,255,.6) .8px, transparent 2px),
+            radial-gradient(circle, rgba(185,195,255,.7) .7px, transparent 2px);
+        animation-duration: 35s;
+        opacity: .6;
+        }
+
+        /* twinkle layer */
+        #sky .stars::after {
+        background-size: 220px 220px;
+        background-image:
+            radial-gradient(circle, white 1px, transparent 2px),
+            radial-gradient(circle, #b9c3ff 1px, transparent 2px);
+        animation: twinkle 3s ease-in-out infinite alternate;
+        opacity: .5;
+        }
+
+        /* BIG STARS */
+        #sky .big-star {
+        position: absolute;
+        width: 4px;
+        height: 4px;
+        border-radius: 50%;
+        background: white;
+        box-shadow: 0 0 12px rgba(185,195,255,.9);
+        animation: bigTwinkle 4s ease-in-out infinite alternate;
+        }
+
+        #sky .big-star.one { top: 18%; left: 20%; }
+        #sky .big-star.two { top: 12%; left: 62%; animation-delay: 1.2s; }
+        #sky .big-star.three { top: 30%; left: 85%; animation-delay: .6s; }
+
+        /* MOON */
+        #sky .moon {
+        position: absolute;
+        top: 12%;
+        left: 5%;
+        width: 110px;
+        height: 110px;
+        border-radius: 50%;
+        background:
+            radial-gradient(circle at 30% 30%, #ffffff, #dfe5ff 60%, #b9c3ff 100%);
+        box-shadow:
+            0 0 40px rgba(185,195,255,.6),
+            0 0 120px rgba(185,195,255,.25);
+        }
+
+        /* MOON CRATERS */
+        #sky .moon::before {
+        content: "";
+        position: absolute;
+        inset: 18%;
+        border-radius: 50%;
+        background:
+            radial-gradient(circle at 40% 35%, rgba(0,0,0,.12) 8px, transparent 9px),
+            radial-gradient(circle at 65% 55%, rgba(0,0,0,.10) 6px, transparent 7px),
+            radial-gradient(circle at 30% 65%, rgba(0,0,0,.08) 5px, transparent 6px);
+        opacity: .5;
+        }
+
+        /* SKY GLOW */
+        #sky .sky-glow {
+        position: absolute;
+        inset: 0;
+        background:
+            radial-gradient(600px 400px at 75% 18%, rgba(185,195,255,.18), transparent 60%),
+            radial-gradient(800px 500px at 50% 35%, rgba(120,140,255,.10), transparent 65%);
+        pointer-events: none;
+        mix-blend-mode: screen;
+        }
+
+        /* 🎉 Confetti */
+    #confetti {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 6; /* above hearts (2–3), below overlay (10) */
+      overflow: hidden;
+    }
+
+    .confetti-piece {
+      position: absolute;
+      width: 8px;
+      height: 14px;
+      background: hsl(var(--hue), 80%, 65%);
+      opacity: 0.9;
+      animation: confettiFall linear forwards;
+    }
+
+    @keyframes confettiFall {
+      from {
+        transform: translateY(-10vh) rotate(0deg);
+        opacity: 1;
+      }
+      to {
+        transform: translateY(110vh) rotate(720deg);
+        opacity: 0;
+      }
+    }
+
+    @keyframes drift {
+    from { transform: translateY(0); }
+    to { transform: translateY(30px); }
+    }
+
+    @keyframes twinkle {
+    from { opacity: .3; }
+    to { opacity: .8; }
+    }
+
+    @keyframes bigTwinkle {
+    from { transform: scale(.85); opacity: .6; }
+    to { transform: scale(1.2); opacity: 1; }
+    }
+
+    @keyframes iceCreamSway{
+      0%, 100% { transform: rotate(-2deg); }
+      50% { transform: rotate(2deg); }
+    }
+
+    @media (max-width: 520px){
+      #icecreams{ right: 4vw; }
+      #icecreams .icecream{ width: 180px; height: 340px; }
+      #icecreams .scoop{ width: 155px; height: 140px; }
+      #icecreams .cone{ border-left-width: 72px; border-right-width: 72px; border-top-width: 195px; }
+      #icecreams .cone::before{ left:-72px; width:144px; height:195px; top:-195px; }
+      #icecreams .waffle{ width: 138px; height: 168px; top: 182px; }
+      #icecreams .collar{ width: 132px; }
+      #icecreams .stage{ gap: 18px; }
+    }
+
+    .cups {
+    width: clamp(140px, 30vw, 200px);
+    }
+
+    @keyframes cupSway {
+    0%, 100% { transform: translateX(-6px); }
+    50% { transform: translateX(6px); }
+    }
+
+    @keyframes floatHeart {
+      from {
+        transform: translateY(0) rotate(45deg) scale(0.8);
+        opacity: 0;
+      }
+      10% { opacity: 0.7; }
+      to {
+        transform: translateY(-120vh) rotate(45deg) scale(1.2);
+        opacity: 0;
+      }
+    }
+
+    /* Animations */
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(15px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.6; }
+    }
+
+    @keyframes bouquetSway {
+      0%, 100% { transform: rotate(-1.5deg); }
+      50% { transform: rotate(1.5deg); }
+    }
+
+    @keyframes flowerFloat {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-6px); }
+    }
+
+    @keyframes petalSway {
+      0%, 100% { transform: rotate(var(--rot)); }
+      50% { transform: rotate(calc(var(--rot) + 3deg)); }
+    }
+
+    @keyframes centerPulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.05); }
+    }
+
+    @keyframes floatUp {
+      from { transform: translateY(0); opacity: 0; }
+      10% { opacity: 0.6; }
+      to { transform: translateY(-120vh); opacity: 0; }
+    }
+    @media (max-width: 768px) {
+      .bouquet {
+        transform: scale(0.85);
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+    <div id="sky">
+        <div class="sky">
+        <div class="stars"></div>
+        <div class="big-star one"></div>
+        <div class="big-star two"></div>
+        <div class="big-star three"></div>
+        <div class="moon"></div>
+        <div class="sky-glow"></div>
+        </div>
+    </div>
+  <div id="confetti"></div>
+  <div id="flowers"></div>
+  <div id="hearts"></div>
+  <div id="cups">
+  <div class="cups-wrapper">
+    <svg class="cups" viewBox="0 0 200 120" xmlns="http://www.w3.org/2000/svg">
+    <!-- Left cup -->
+    <g transform="translate(30,30) rotate(-4)">
+      <rect x="0" y="20" rx="8" ry="8" width="50" height="40" fill="#f5f1ea"/>
+      <rect x="0" y="15" rx="8" ry="8" width="50" height="10" fill="#d6cfc4"/>
+      <ellipse cx="25" cy="15" rx="22" ry="6" fill="#7b4a2e"/>
+      <path d="M50 28 q18 6 0 20" fill="none" stroke="#f5f1ea" stroke-width="4"/>
+    </g>
+
+    <!-- Right cup -->
+    <g transform="translate(95,30) rotate(4)">
+      <rect x="0" y="20" rx="8" ry="8" width="50" height="40" fill="#f5f1ea"/>
+      <rect x="0" y="15" rx="8" ry="8" width="50" height="10" fill="#d6cfc4"/>
+      <ellipse cx="25" cy="15" rx="22" ry="6" fill="#7b4a2e"/>
+      <path d="M-2 28 q-18 6 0 20" fill="none" stroke="#f5f1ea" stroke-width="4"/>
+    </g>
+    </svg>
+    </div>
+    </div>
+
+    <div id="icecreams">
+  <div class="icecream-wrapper">
+    <div class="stage" aria-label="Two vanilla ice creams tilted toward each other">
+      <div class="icecream left">
+        <div class="scoop">
+          <div class="highlight"></div>
+          <div class="highlight2"></div>
+        </div>
+        <div class="collar"></div>
+        <div class="cone"></div>
+        <div class="waffle"></div>
+      </div>
+
+      <div class="icecream right">
+        <div class="scoop">
+          <div class="highlight"></div>
+          <div class="highlight2"></div>
+        </div>
+        <div class="collar"></div>
+        <div class="cone"></div>
+        <div class="waffle"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+  <audio id="bgMusic" loop>
+    <source src="music.mp3" type="audio/mpeg">
+  </audio>
+
+  <div class="overlay" onclick="startExperience()">
+    <h2>Tap to begin 🌙</h2>
+  </div>
+
+  <div class="container">
+    <h1>Hey you 🌙</h1>
+
+    <p>
+      I spent most of my life feeling like a ghost. Drifting, surviving,
+      waiting for life to finally notice me.
+      I told myself I was fine being alone.
+      I wasn’t.
+    </p>
+
+    <p>
+      Then you appeared.
+      Quietly. Unexpectedly.
+      And somehow, everything I’d given up on
+      started to feel possible again.
+    </p>
+
+    <p>
+      You didn’t save me.
+      You didn’t promise anything.
+      You just stayed.
+      And for the first time in my life,
+      I felt chosen.
+    </p>
+
+    <p>
+      You inspire me. With your strength,
+      your kindness, your resilience,
+      and the way you keep going
+      even when life was never gentle with you.
+    </p>
+
+    <p>
+      I don’t want to drift anymore.
+      I don’t want to survive.
+      I want to live,
+      and I want to choose you while I do.
+    </p>
+    
+    <div id="prompt">
+    <div class="question">Will you do me the honour of making me your boyfriend?</div>
+    <div class="buttons">
+    <button class="yes" onclick="sayYes()">Yes</button>
+    <button class="no" onclick="sayNo()">No</button>
+    </div>
+    </div>
+
+    <div id="response"></div>
+  </div>
+
+  <script>
+    const music = document.getElementById("bgMusic");
+    music.volume = 0.6;
+
+    function startExperience() {
+      document.querySelector(".overlay").style.display = "none";
+      music.play();
+      spawnFlowers();
+      spawnHearts();
+      document.getElementById("sky").style.opacity = "1";
+      document.getElementById("cups").style.opacity = "1";
+      document.getElementById("icecreams").style.opacity = "1";
+      const container = document.querySelector(".container");
+      container.style.animation = "fadeIn 2s ease forwards";
+    }
+
+    function sayYes() {
+      popConfetti();
+      document.getElementById("prompt").style.display = "none";
+      document.getElementById("response").innerHTML =
+        "Thank you for making me the happiest man alive <br>" + 
+        "I love you so very much meri jaan ❤️";
+    }
+    
+    function sayNo() {
+      document.getElementById("prompt").style.display = "none";
+      document.getElementById("response").innerHTML =
+        "Thank you for being honest with me 🌙<br><br>" +
+        "I’m really glad I got to tell you how I feel, and I wish you nothing but happiness.";
+    }
+
+    function spawnFlowers() {
+      const isMobile = window.innerWidth < 768;
+      const yOffset = isMobile
+        ? window.innerHeight - 200
+        : window.innerHeight - 260;
+      const leftX = isMobile ? 20 : 40;
+      const rightX = isMobile
+        ? window.innerWidth - 180
+        : window.innerWidth - 240;
+      createBouquet(leftX, yOffset);
+      createBouquet(rightX, yOffset);
+      setInterval(createBreath, 700);
+    }
+
+    function createBouquet(x, y) {
+      const bouquet = document.createElement("div");
+      bouquet.className = "bouquet";
+      bouquet.style.left = x + "px";
+      bouquet.style.top = y + "px";
+      bouquet.style.animationDelay = `${Math.random() * 3}s`;
+
+      const stem = document.createElement("div");
+      stem.className = "stem";
+      const leaf = document.createElement("div");
+      leaf.className = "leaf";
+      stem.appendChild(leaf);
+      bouquet.appendChild(stem);
+
+      const offsets = [
+        { x: -10, y: 30, r: -6, s: 0.92 }, // left
+        { x: 30,  y: 0,  r: 2,  s: 1.05 }, // middle
+        { x: 70,  y: 35, r: -3, s: 0.92 }  // right
+      ];
+
+      offsets.forEach(o => {
+        const flower = document.createElement("div");
+        flower.className = "sunflower";
+        flower.style.left = o.x + "px";
+        flower.style.top = o.y + "px";
+        flower.style.transform = `rotate(${o.r}deg) scale(${o.s})`;
+        flower.style.animationDelay = `${Math.random() * 2}s`;
+
+        for (let i = 0; i < 12; i++) {
+          const petal = document.createElement("div");
+          petal.className = "petal";
+          const angle = i * 30;
+          petal.style.setProperty("--rot", `${angle}deg`);
+          petal.style.animationDelay = `${Math.random()}s`;
+          flower.appendChild(petal);
+        }
+
+        const center = document.createElement("div");
+        center.className = "center";
+        flower.appendChild(center);
+
+        bouquet.appendChild(flower);
+      });
+
+      document.getElementById("flowers").appendChild(bouquet);
+    }
+
+    function createBreath() {
+      const dot = document.createElement("div");
+      dot.className = "breath";
+      dot.style.left = Math.random() * window.innerWidth + "px";
+      dot.style.bottom = "-10px";
+      dot.style.animationDuration = 6 + Math.random() * 6 + "s";
+      document.getElementById("flowers").appendChild(dot);
+      setTimeout(() => dot.remove(), 12000);
+    }
+
+    function spawnHearts() {
+      setInterval(createHeart, 900);
+    }
+
+    function createHeart() {
+      const heart = document.createElement("div");
+      heart.className = "heart";
+      heart.style.left = Math.random() * window.innerWidth + "px";
+      heart.style.bottom = "-20px";
+      heart.style.animationDuration = 8 + Math.random() * 6 + "s";
+      heart.style.transform = `rotate(45deg) scale(${0.6 + Math.random() * 0.6})`;
+      document.getElementById("hearts").appendChild(heart);
+      setTimeout(() => heart.remove(), 14000);
+    }
+
+    function popConfetti() {
+      const confettiContainer = document.getElementById("confetti");
+      const colors = [340, 20, 45, 190, 260]; // pinks, golds, blues
+      const duration = 5000; 
+      const endTime = Date.now() + duration;
+
+      const interval = setInterval(() => {
+        for (let i = 0; i < 20; i++) {
+          const piece = document.createElement("div");
+          piece.className = "confetti-piece";
+          piece.style.left = Math.random() * 100 + "vw";
+          piece.style.animationDuration = 1 + Math.random() * 1.5 + "s";
+          piece.style.setProperty(
+            "--hue",
+            colors[Math.floor(Math.random() * colors.length)]
+          );
+
+          confettiContainer.appendChild(piece);
+          setTimeout(() => piece.remove(), 3000);
+        }
+
+        if (Date.now() > endTime) {
+          clearInterval(interval);
+        }
+      }, 300);
+    }
+
+
+    </script>
+  </body>
+</html>
